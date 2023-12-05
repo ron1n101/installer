@@ -80,7 +80,7 @@
     <rect>
      <x>30</x>
      <y>30</y>
-     <width>135</width>
+     <width>136</width>
      <height>311</height>
     </rect>
    </property>
@@ -117,6 +117,13 @@
      <widget class="QCheckBox" name="ShipSure_checkBox">
       <property name="text">
        <string>ShipSure</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="GoogleChrome_checkBox">
+      <property name="text">
+       <string>Google Chrome</string>
       </property>
      </widget>
     </item>
