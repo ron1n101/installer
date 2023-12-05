@@ -62,8 +62,8 @@ void Widget::onCheckBoxesClicked()
             selectedApps.append(checkBox->text());
         }
     }
-    fileMapping["Acrobat Reader"] = "readerdc64.exe"; // not working
-    fileMapping["AnyDesk"] = "AnyDesk";               // not working
+
+        // тут был файлмаппинг!!!
 
 }
 
@@ -123,6 +123,7 @@ void Widget::onAcrobatReader_checkBox()
     if(ui->AcrobatReader_checkBox->isChecked())
     {
         selectedApps.append(appName);
+        fileMapping["Acrobat Reader"] = "readerdc64.exe";
     }
 }
 
@@ -134,6 +135,7 @@ void Widget::onAnyDesk_checkBox()
     if (ui->AnyDesk_checkBox->isChecked())
     {
         selectedApps.append(appName);
+        fileMapping["AnyDesk"] = "AnyDesk.exe";
     }
 }
 
@@ -141,10 +143,11 @@ void Widget::onAnyDesk_checkBox()
 void Widget::onJava_checkBox()
 {
     QString appName = "Java";
-    QString downloadUrl = "https://sdlc-esd.oracle.com/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/jre-8u391-windows-x64.exe?GroupName=JSC&FilePath=/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/jre-8u391-windows-x64.exe&BHost=javadl.sun.com&File=jre-8u391-windows-x64.exe&AuthParam=1701611483_4dd0fec506c8b98b2381a5befff0304b&ext=.exe";
+    QString downloadUrl = "https://sdlc-esd.oracle.com/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/JavaSetup8u391.exe?GroupName=JSC&FilePath=/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/JavaSetup8u391.exe&BHost=javadl.sun.com&File=JavaSetup8u391.exe&AuthParam=1701801365_844a8fea876d4e7a276b47057e9e7f51&ext=.exe";
     if (ui->Java_checkBox->isChecked())
     {
         selectedApps.append(appName);
+        fileMapping["Java"] = "JavaSetup8u391.exe";
     }
 }
 
@@ -155,6 +158,7 @@ void Widget::onShipSure_checkBox()
     if (ui->ShipSure_checkBox->isChecked())
     {
         selectedApps.append(appName);
+        fileMapping["ShipSure"] = "FrameworkPublicLiveWest2.msi";
     }
 }
 
@@ -166,17 +170,19 @@ void Widget::onTeams_checkBox()
     if (ui->Teams_checkBox->isChecked())
     {
         selectedApps.append(appName);
+        fileMapping["Teams"] = "MSTeams-x86.msix";
     }
 }
 
 void Widget::onZip_checkBox()
 {
     QString appName = "7Zip";
-    QString downloadUrl = "https://www.7-zip.org/a/7z2301-x64.exe";
+    QString downloadUrl = "https://www.7-zip.org/a/7z2200-x64.msi";
 
     if (ui->zip_checkBox->isChecked())
     {
         selectedApps.append(appName);
+        fileMapping["7Zip"] = "7z2200-x64.msi";
     }
 }
 
@@ -188,6 +194,7 @@ void Widget::onGoogleChrome_checkBox()
     if(ui->GoogleChrome_checkBox->isChecked())
     {
         selectedApps.append(appName);
+        fileMapping["Google Chrome"] = "ChromeSetup.exe";
     }
 }
 
@@ -199,7 +206,7 @@ void Widget::onInstallPushButton()
         if (appName == "7Zip")
         {
             qDebug() << "Downloading 7Zip";
-            downloadUrl = "https://www.7-zip.org/a/7z2301-x64.exe";
+            downloadUrl = "https://www.7-zip.org/a/7z2200-x64.msi";
         }
 
         if (appName == "AnyDesk")
@@ -217,7 +224,7 @@ void Widget::onInstallPushButton()
         if (appName == "Java")
         {
             qDebug() << "Downloading Java";
-            downloadUrl = "https://sdlc-esd.oracle.com/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/jre-8u391-windows-x64.exe?GroupName=JSC&FilePath=/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/jre-8u391-windows-x64.exe&BHost=javadl.sun.com&File=jre-8u391-windows-x64.exe&AuthParam=1701611483_4dd0fec506c8b98b2381a5befff0304b&ext=.exe";
+            downloadUrl = "https://sdlc-esd.oracle.com/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/JavaSetup8u391.exe?GroupName=JSC&FilePath=/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/JavaSetup8u391.exe&BHost=javadl.sun.com&File=JavaSetup8u391.exe&AuthParam=1701801365_844a8fea876d4e7a276b47057e9e7f51&ext=.exe";
         }
 
         if (appName == "ShipSure")
@@ -302,7 +309,7 @@ void Widget::InstallerRun(const QString &appName)
             return;
         }
 
-        connect(installerProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this, installerProcess]()
+        connect(installerProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [installerProcess]()
                 {
                     qDebug() << "Installer finished with exit code: " << installerProcess ->exitCode();
                     installerProcess->deleteLater();
