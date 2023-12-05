@@ -1,6 +1,12 @@
+
+//
+
+// УЗНАТЬ ПРО МЕТОД СКАЧИВАНИЯ БОЛЬШИХ ФАЙЛОВ ЧЕРЕЗ QT И ТАКЖЕ НАПИСАТЬ МЕТОД СКАЧИВАНИЯ.
+// ПРОГУГЛИТЬ ИНФУ ПО ПОТОКИ.
+
 #include "widget.h"
-#include "downloader.h"
 #include "ui_widget.h"
+#include <windows.h>
 
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -12,17 +18,6 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-
-
-//  переписать этот блок
-    checkBoxes.append(ui->AcrobatReader_checkBox);
-    checkBoxes.append(ui->AnyDesk_checkBox);
-    checkBoxes.append(ui->Java_checkBox);
-    checkBoxes.append(ui->ShipSure_checkBox);
-    checkBoxes.append(ui->Teams_checkBox);
-    checkBoxes.append(ui->zip_checkBox);
-//
-
 
     connect(ui->AcrobatReader_checkBox, &QCheckBox::clicked, this, &Widget::onAcrobatReader_checkBox);
     connect(ui->AnyDesk_checkBox, &QCheckBox::clicked, this, &Widget::onAnyDesk_checkBox);
@@ -36,21 +31,20 @@ Widget::Widget(QWidget *parent)
     connect(ui->installPushButton, &QPushButton::clicked, this, &Widget::onInstallPushButton);
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &Widget::onCancelDownloadPushButton);
 
+
+
     for(auto checkBox : checkBoxes)
     {
         connect(checkBox, &QCheckBox::clicked, this, &Widget::onCheckBoxesClicked);
     }
 
-    // connect slots progressbar (add after coding downloader.h)
-    // connect(ui->UpdateProgressBar, &QProgressBar::valueChanged, this, &Widget::)
-
-    // создать кнопку отмены загрузки
-    // создать кнопку выбрать всё
-
-    // УЗНАТЬ ПРО МЕТОД СКАЧИВАНИЯ БОЛЬШИХ ФАЙЛОВ ЧЕРЕЗ QT И ТАКЖЕ НАПИСАТЬ МЕТОД СКАЧИВАНИЯ.
-    // ПРОГУГЛИТЬ ИНФУ ПО ПОТОКИ.
-
-
+    checkBoxes.append(ui->AcrobatReader_checkBox);
+    checkBoxes.append(ui->AnyDesk_checkBox);
+    checkBoxes.append(ui->Java_checkBox);
+    checkBoxes.append(ui->ShipSure_checkBox);
+    checkBoxes.append(ui->Teams_checkBox);
+    checkBoxes.append(ui->zip_checkBox);
+    checkBoxes.append(ui->GoogleChrome_checkBox);
 }
 
 Widget::~Widget()
@@ -68,7 +62,13 @@ void Widget::onCheckBoxesClicked()
             selectedApps.append(checkBox->text());
         }
     }
+    fileMapping["Acrobat Reader"] = "readerdc64.exe"; // not working
+    fileMapping["AnyDesk"] = "AnyDesk";               // not working
+
 }
+
+
+
 
 void Widget::onSelectAll_checkBox()
 {
@@ -79,6 +79,10 @@ void Widget::onSelectAll_checkBox()
     }
     onCheckBoxesClicked();
 }
+
+
+
+
 void Widget::updateProgressBar(int progress)
 {
     // Обновление прогресса в вашем прогресс-баре
@@ -92,6 +96,7 @@ void Widget::onSelectTargetFolder()
     targetFolder = QFileDialog::getExistingDirectory(this, tr("Select Folder"), QStandardPaths::writableLocation(QStandardPaths::DownloadLocation),
                                                      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     ui->TargetFolderLineEdit->setText(targetFolder);
+    installPath = targetFolder;
 }
 
 void Widget::onCancelDownloadPushButton()
@@ -175,6 +180,16 @@ void Widget::onZip_checkBox()
     }
 }
 
+void Widget::onGoogleChrome_checkBox()
+{
+    QString appName = "Google Chrome";
+    QString downloadUrl = "https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B0F9ED7A0-7BDE-5A4E-2175-3A01A3CF3319%7D%26lang%3Duk%26browser%3D4%26usagestats%3D1%26appname%3DGoogle%2520Chrome%26needsadmin%3Dprefers%26ap%3Dx64-stable-statsdef_1%26installdataindex%3Dempty/update2/installers/ChromeSetup.exe";
+
+    if(ui->GoogleChrome_checkBox->isChecked())
+    {
+        selectedApps.append(appName);
+    }
+}
 
 void Widget::onInstallPushButton()
 {
@@ -211,6 +226,12 @@ void Widget::onInstallPushButton()
             downloadUrl = "https://ssdeploy.v.group/west/FrameworkPublicLiveWest2.msi";
         }
 
+        if (appName == "Google Chrome")
+        {
+            qDebug() << "Downloading Google Chrome";
+            downloadUrl = "https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B0F9ED7A0-7BDE-5A4E-2175-3A01A3CF3319%7D%26lang%3Duk%26browser%3D4%26usagestats%3D1%26appname%3DGoogle%2520Chrome%26needsadmin%3Dprefers%26ap%3Dx64-stable-statsdef_1%26installdataindex%3Dempty/update2/installers/ChromeSetup.exe";
+        }
+
         if (appName == "Teams")
         {
             qDebug() << "Downloading Teams";
@@ -231,14 +252,65 @@ void Widget::onInstallPushButton()
             connect(downloader, &Downloader::downloadProgress, this, &Widget::updateProgressBar);
             connect(downloader, &Downloader::downloadFinished, downloader, &Downloader::deleteLater);
 
+            connect(downloader, &Downloader::downloadFinished, this, [this, appName]() {
+                InstallerRun(appName);
+            });
             downloaders.append(downloader);
         }
-
-
     }
 }
 
+// void Widget::InstallerRun(const QString &appName)
+// {
+//     QProcess *installerProcess = new QProcess(this);
+//     QString installerPath = installPath + "/" + fileMapping[appName];
 
+//     if(QFile::exists(installerPath))
+//     {
+//         qDebug() << "Running for " << appName << " from " << installerPath;
+//         installerProcess->start(installerPath);
+//     }
+//     else
+//     {
+//         qDebug() << "Error: installer file not found!!!";
+//     }
 
+//     connect(installerProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this, installerProcess]()
+//             {
+//         qDebug() << "Installer finished with exit code: " << installerProcess ->exitCode();
+//         installerProcess->deleteLater();
+//     });
+// }
 
+void Widget::InstallerRun(const QString &appName)
+{
+    QProcess *installerProcess = new QProcess(this);
+
+    if (fileMapping.contains(appName))
+    {
+        QString installerExePath = installPath + "/" + fileMapping[appName];
+        qDebug() << "Running installer for " << appName << " from " << installerExePath;
+
+        if (QFile::exists(installerExePath))
+        {
+            qDebug() << "Installer file found!";
+            installerProcess->start(installerExePath);
+        }
+        else
+        {
+            qDebug() << "Error: Installer file not found!";
+            return;
+        }
+
+        connect(installerProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this, installerProcess]()
+                {
+                    qDebug() << "Installer finished with exit code: " << installerProcess ->exitCode();
+                    installerProcess->deleteLater();
+                });
+    }
+    else
+    {
+        qDebug() << "Error: App name not found in fileMapping!";
+    }
+}
 

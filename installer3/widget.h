@@ -4,10 +4,13 @@
 
 #include "downloader.h"
 
+#include <unordered_map>
+
 #include <QWidget>
 #include <QCheckBox>
 #include <QList>
-
+#include <QProcess>
+#include <QMap>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,6 +34,7 @@ private slots:
     void onShipSure_checkBox();
     void onTeams_checkBox();
     void onZip_checkBox();
+    void onGoogleChrome_checkBox();
     void onSelectAll_checkBox();
 
     void onSelectTargetFolder();
@@ -44,6 +48,7 @@ private slots:
 
 
 
+
 private:
     QList<QCheckBox *> checkBoxes;
     QList<QString> selectedApps;
@@ -51,7 +56,9 @@ private:
     Ui::Widget *ui;
     void downloadApplication(const QString &appName, const QString &downloadUrl);
     QList<Downloader*> downloaders;
+    QString installPath;
+    void InstallerRun(const QString &appName);
 
-    // Downloader cancel_downloader;
+    QMap<QString, QString> fileMapping;     // not working
 };
 #endif // WIDGET_H
