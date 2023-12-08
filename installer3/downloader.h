@@ -43,7 +43,6 @@ private:
 
     bool isCancel;
 
-    // Downloader downloader;
 };
 
 #endif // DOWNLOADER_H
