@@ -1,8 +1,5 @@
-
-//
-
-// УЗНАТЬ ПРО МЕТОД СКАЧИВАНИЯ БОЛЬШИХ ФАЙЛОВ ЧЕРЕЗ QT И ТАКЖЕ НАПИСАТЬ МЕТОД СКАЧИВАНИЯ.
-// ПРОГУГЛИТЬ ИНФУ ПО ПОТОКИ.
+// task: if application already downloaded, downloading app skiping.
+// task:
 
 #include "widget.h"
 #include "ui_widget.h"
@@ -120,97 +117,6 @@ void Widget::onCancelDownloadPushButton()   // кнопка остановки �
 
 }
 
-
-// void Widget::onAcrobatReader_checkBox()
-// {
-//     QString appName = "Acrobat Reader";
-//     if(ui->AcrobatReader_checkBox->isChecked())
-//     {
-//         selectedApps.insert(appName);
-//     }
-//     else
-//     {
-//         // TODO: find and remove selectedApps
-//     }
-// }
-
-// void Widget::onAnyDesk_checkBox()
-// {
-//     static const QString appName = "AnyDesk";
-//     if (ui->AnyDesk_checkBox->isChecked())
-//     {
-//         selectedApps.insert(appName);
-//     }
-//     else
-//     {
-//         // TODO: find and remove selectedApps
-//     }
-// }
-
-
-// void Widget::onJava_checkBox()
-// {
-//     static const QString appName = "Java";
-//     if (ui->Java_checkBox->isChecked())
-//     {
-//         selectedApps.insert(appName);
-//     }
-//     else
-//     {
-//         // TODO: find and remove selectedApps
-//     }
-// }
-
-// void Widget::onShipSure_checkBox()
-// {
-//     static const QString appName = "ShipSure";
-//     if (ui->ShipSure_checkBox->isChecked())
-//     {
-//         selectedApps.insert(appName);
-//     }
-//     else
-//     {
-//         // TODO: find and remove selectedApps
-//     }
-// }
-
-
-// void Widget::onTeams_checkBox()
-// {
-//     static const QString appName = "Teams";
-//     if (ui->Teams_checkBox->isChecked())
-//     {
-//         selectedApps.insert(appName);
-//     }
-//     else
-//     {
-//         // TODO: find and remove selectedApps
-//     }
-// }
-
-// void Widget::onZip_checkBox()
-// {
-//     static const QString appName = "7Zip";
-//     if (ui->zip_checkBox->isChecked())
-//     {
-//         selectedApps.insert(appName);
-//     }
-//     else
-//     {
-//         // TODO: find and remove selectedApps
-//     }
-// }
-
-// void Widget::onGoogleChrome_checkBox()
-// {
-//     static const QString appName = "Google Chrome";
-//     if(ui->GoogleChrome_checkBox->isChecked())
-//     {
-//         selectedApps.insert(appName);
-//         // fileMapping["Google Chrome"] = "ChromeSetup.exe";
-//     }
-// }
-
 void Widget::onInstallPushButton()          // кнопка скачивания
 {
     for(auto &appName : selectedApps)
@@ -223,9 +129,15 @@ void Widget::onInstallPushButton()          // кнопка скачивания
             downloadUrl = it->second.link;
         }
 
-
         if (!downloadUrl.isEmpty())
         {
+            QString installerExePath = ui->TargetFolderLineEdit->text() + "/" + fileMapping[appName].pathApp;
+            if (QFile::exists(installerExePath))        // если приложение было скачано в папку ранее, то скачивание не повториться, пропуститься
+            {
+                qDebug() << "Application " << appName << " is already downloaded. Download skip.";
+                continue;
+            }
+
             Downloader *downloader = new Downloader(this);
             downloader->start(ui->TargetFolderLineEdit->text(), appName, QUrl(downloadUrl));
             connect(downloader, &Downloader::downloadProgress, this, &Widget::updateProgressBar);
