@@ -1,4 +1,4 @@
-// task: if application already downloaded, downloading app skiping.
+// task: if application already downloaded, downloading app skiping. +
 // task:
 
 #include "widget.h"
@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QDebug>
+#include <QPixmap>
 
 
 std::unordered_map<QString, DownloadedApp> Widget::fileMapping =
@@ -28,18 +29,15 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // connect(ui->AcrobatReader_checkBox, &QCheckBox::clicked, this, &Widget::onAcrobatReader_checkBox);
-    // connect(ui->AnyDesk_checkBox, &QCheckBox::clicked, this, &Widget::onAnyDesk_checkBox);
-    // connect(ui->Java_checkBox, &QCheckBox::clicked, this, &Widget::onJava_checkBox);
-    // connect(ui->ShipSure_checkBox, &QCheckBox::clicked, this, &Widget::onShipSure_checkBox);
-    // connect(ui->Teams_checkBox, &QCheckBox::clicked, this, &Widget::onTeams_checkBox);
-    // connect(ui->zip_checkBox, &QCheckBox::clicked, this, &Widget::onZip_checkBox);
-
     connect(ui->SelectAll_checkBox, &QCheckBox::clicked, this, &Widget::onSelectAll_checkBox);
     connect(ui->SelectTargetFolderButton, &QPushButton::clicked, this, &Widget::onSelectTargetFolder);
     connect(ui->installPushButton, &QPushButton::clicked, this, &Widget::onInstallPushButton);
     connect(ui->cancelPushButton, &QPushButton::clicked, this, &Widget::onCancelDownloadPushButton);
+    QPixmap pix(":/resources/img/V_LOGO_VISION_GREEN_RGB.png");
 
+    int w = ui->logo->width();
+    int h = ui->logo->height();
+    ui->logo->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 
     checkBoxes.append(ui->AcrobatReader_checkBox);
     checkBoxes.append(ui->AnyDesk_checkBox);
@@ -48,11 +46,12 @@ Widget::Widget(QWidget *parent)
     checkBoxes.append(ui->Teams_checkBox);
     checkBoxes.append(ui->zip_checkBox);
     checkBoxes.append(ui->GoogleChrome_checkBox);
-    for(auto checkBox : checkBoxes)
-    {
-        connect(checkBox, &QCheckBox::clicked, this, &Widget::onCheckBoxesClicked);
-    }
+    // for(auto checkBox : checkBoxes)
+    // {
+    //     connect(checkBox, &QCheckBox::clicked, this, &Widget::onCheckBoxesClicked);
+    // }
     ui->TargetFolderLineEdit->setText("D:\\testfolder");
+
 }
 
 Widget::~Widget()
@@ -60,19 +59,19 @@ Widget::~Widget()
     delete ui;
 }
 
-void Widget::onCheckBoxesClicked()      // вместо того что бы подключать все чекбоксы, была написана функция, которая считывает выбранные приложения по названиям из appName
-{
-    selectedApps.clear();
-    for (auto checkBox : checkBoxes)
-    {
-        if (checkBox->isChecked())
-        {
-            QString appName = checkBox->text();
-            // selectedApps.insert(checkBox->text());
-            selectedApps.insert(appName);
-        }
-    }
-}
+// void Widget::onCheckBoxesClicked()      // вместо того что бы подключать все чекбоксы, была написана функция, которая считывает выбранные приложения по названиям из appName
+// {
+//     selectedApps.clear();
+//     for (auto checkBox : checkBoxes)
+//     {
+//         if (checkBox->isChecked())
+//         {
+//             QString appName = checkBox->text();
+//             // selectedApps.insert(checkBox->text());
+//             selectedApps.insert(appName);
+//         }
+//     }
+// }
 
 
 
@@ -83,7 +82,7 @@ void Widget::onSelectAll_checkBox()
     {
         checkBox->setChecked(selectedAllChecked);
     }
-    onCheckBoxesClicked();
+    // onCheckBoxesClicked();
 }
 
 
@@ -117,36 +116,79 @@ void Widget::onCancelDownloadPushButton()   // кнопка остановки �
 
 }
 
-void Widget::onInstallPushButton()          // кнопка скачивания
+// void Widget::onInstallPushButton()          // кнопка скачивания
+// {
+//     for(auto &appName : selectedApps)
+//     {
+//         QString downloadUrl;
+
+//         auto it = fileMapping.find(appName);
+//         if(it != fileMapping.end())
+//         {
+//             downloadUrl = it->second.link;
+//         }
+
+//         if (!downloadUrl.isEmpty())
+//         {
+//             QString installerExePath = ui->TargetFolderLineEdit->text() + "/" + fileMapping[appName].pathApp;
+//             if (QFile::exists(installerExePath))        // если приложение было скачано в папку ранее, то скачивание не повториться, пропуститься
+//             {
+//                 qDebug() << "Application " << appName << " is already downloaded. Download skip.";
+//                 continue;
+//             }
+
+//             Downloader *downloader = new Downloader(this);
+//             downloader->start(ui->TargetFolderLineEdit->text(), appName, QUrl(downloadUrl));
+//             connect(downloader, &Downloader::downloadProgress, this, &Widget::updateProgressBar);
+//             connect(downloader, &Downloader::downloadFinished, downloader, &Downloader::deleteLater);
+//             connect(downloader, &Downloader::downloadFinished, this, [this, appName]() {
+//                 InstallerRun(appName);
+//             });
+//             downloaders.append(downloader);
+//         }
+//     }
+// }
+
+void Widget::onInstallPushButton()
 {
-    for(auto &appName : selectedApps)
+    for (auto checkBox : checkBoxes)
     {
         QString downloadUrl;
-
-        auto it = fileMapping.find(appName);
-        if(it != fileMapping.end())
+        if (checkBox->isChecked())
         {
-            downloadUrl = it->second.link;
-        }
+            QString appName = checkBox->text();
+            // selectedApps.insert(appName);
 
-        if (!downloadUrl.isEmpty())
-        {
-            QString installerExePath = ui->TargetFolderLineEdit->text() + "/" + fileMapping[appName].pathApp;
-            if (QFile::exists(installerExePath))        // если приложение было скачано в папку ранее, то скачивание не повториться, пропуститься
+            auto it = fileMapping.find(appName);
+            if (it != fileMapping.end())
             {
-                qDebug() << "Application " << appName << " is already downloaded. Download skip.";
-                continue;
+                downloadUrl = it->second.link;
             }
+            if(!downloadUrl.isEmpty())
+            {
+                QString installerPath = ui->TargetFolderLineEdit->text() + "/" + fileMapping[appName].pathApp;
 
-            Downloader *downloader = new Downloader(this);
-            downloader->start(ui->TargetFolderLineEdit->text(), appName, QUrl(downloadUrl));
-            connect(downloader, &Downloader::downloadProgress, this, &Widget::updateProgressBar);
-            connect(downloader, &Downloader::downloadFinished, downloader, &Downloader::deleteLater);
+                if(QFile::exists(installerPath))
+                {
+                    qDebug() << "App " << appName << " is already downloaded. Download skipped.";
+                    ui->debugMsg->append("App " + appName + " is already downloaded. Download skipped.\n");
+                    continue;
+                }
+                else
+                {
+                    qDebug() << "App " << appName << " start downloading.";
+                    ui->debugMsg->append("App " + appName + " start downloading.\n");
+                }
 
-            connect(downloader, &Downloader::downloadFinished, this, [this, appName]() {
-                InstallerRun(appName);
-            });
-            downloaders.append(downloader);
+                Downloader *downloader = new Downloader(this);
+                downloader->start(ui->TargetFolderLineEdit->text(), appName, QUrl(downloadUrl));
+                connect(downloader, &Downloader::downloadProgress, this, &Widget::updateProgressBar);
+                connect(downloader, &Downloader::downloadFinished, downloader, &Downloader::deleteLater);
+                connect(downloader, &Downloader::downloadFinished, this, [this, appName]() {
+                    InstallerRun(appName);
+                });
+                downloaders.append(downloader);
+            }
         }
     }
 }
@@ -155,9 +197,10 @@ void Widget::onInstallPushButton()          // кнопка скачивания
 void Widget::InstallerRun(const QString &appName)       // метод для запуска установки
 {
     QProcess *installerProcess = new QProcess(this);
+    QString installerExePath = QUrl::fromLocalFile(ui->TargetFolderLineEdit->text() + "\\" + fileMapping[appName].pathApp).toLocalFile();       // changed to open method
 
-    QString installerExePath = ui->TargetFolderLineEdit->text() + "/" + fileMapping[appName].pathApp;
     qDebug() << "Running installer for " << appName << " from " << installerExePath;
+    ui->debugMsg->append("Running installer for " + appName + " from " + installerExePath);
 
     QFileInfo fileInfo(installerExePath);
     QString fileExtension = fileInfo.suffix().toLower();
@@ -169,17 +212,23 @@ void Widget::InstallerRun(const QString &appName)       // метод для з�
 
     if (QFile::exists(installerExePath))
     {
-        qDebug() << "Installer file found!";
+        qDebug() << "Installer file found!\n";
+        ui->debugMsg->append("Installer file found!\n");
+
         installerProcess->start(installerExePath);
     }
     else
     {
-        qDebug() << "Error: Installer file not found!";
+        qDebug() << "Error: Installer file not found!\n";
+        ui->debugMsg->append("Error: Installer file not found!\n");
+
         return;
     }
     connect(installerProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [installerProcess]()
     {
-        qDebug() << "Installer finished with exit code: " << installerProcess ->exitCode();
+        qDebug() << "Installer finished with exit code: " << installerProcess->exitCode() << "\n";
+
+
         installerProcess->deleteLater();
     });
 }
