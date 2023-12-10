@@ -6,18 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>648</width>
-    <height>637</height>
+    <width>653</width>
+    <height>689</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Widget</string>
+   <string>Installer Programs</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color:grey</string>
+   <string notr="true">background-color: rgb(208, 208, 208);</string>
   </property>
   <widget class="QProgressBar" name="UpdateProgressBar">
    <property name="geometry">
@@ -159,6 +159,37 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QTextEdit" name="debugMsg">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>490</y>
+     <width>631</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+  </widget>
+  <widget class="QLabel" name="logo">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>40</y>
+     <width>131</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
   </widget>
  </widget>
  <resources/>
