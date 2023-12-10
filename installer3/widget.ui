@@ -13,6 +13,12 @@
   <property name="windowTitle">
    <string>Widget</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color:grey</string>
+  </property>
   <widget class="QProgressBar" name="UpdateProgressBar">
    <property name="geometry">
     <rect>
@@ -87,6 +93,12 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QCheckBox" name="AcrobatReader_checkBox">
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
       <property name="text">
        <string>Acrobat Reader</string>
       </property>
