@@ -15,7 +15,7 @@ std::unordered_map<QString, DownloadedApp> Widget::fileMapping =
     {
         {"Acrobat Reader", {"https://admdownload.adobe.com/rdcm/installers/live/readerdc64.exe", "readerdc64.exe"}},
         {"AnyDesk", {"https://download.anydesk.com/AnyDesk.exe", "AnyDesk.exe"}},
-        {"Java", {"https://sdlc-esd.oracle.com/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/JavaSetup8u391.exe?GroupName=JSC&FilePath=/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/JavaSetup8u391.exe&BHost=javadl.sun.com&File=JavaSetup8u391.exe&AuthParam=1701801365_844a8fea876d4e7a276b47057e9e7f51&ext=.exe", "JavaSetup8u391.exe"}},
+        {"Java", {"https://sdlc-esd.oracle.com/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/jre-8u391-windows-x64.exe?GroupName=JSC&FilePath=/ESD6/JSCDL/jdk/8u391-b13/b291ca3e0c8548b5a51d5a5f50063037/jre-8u391-windows-x64.exe&BHost=javadl.sun.com&File=jre-8u391-windows-x64.exe&AuthParam=1702223777_f2dc2e8a6084b578fef2b1e0aa38be1d&ext=.exe", "jre-8u391-windows-x64.exe"}},
         {"ShipSure", {"https://ssdeploy.v.group/west/FrameworkPublicLiveWest2.msi","FrameworkPublicLiveWest2.msi"}},
         {"Teams", {"https://statics.teams.cdn.office.net/production-windows-x86/enterprise/webview2/lkg/MSTeams-x86.msix", "MSTeams-x86.msix"}},
         {"7Zip", {"https://www.7-zip.org/a/7z2200-x64.msi", "7z2200-x64.msi"}},
@@ -205,7 +205,7 @@ void Widget::InstallerRun(const QString &appName)       // метод для з�
     QFileInfo fileInfo(installerExePath);
     QString fileExtension = fileInfo.suffix().toLower();
 
-    if(fileExtension == "msi" || fileExtension == "msix")
+    if(fileExtension == "msi" || fileExtension == "msix" || fileExtension == "exe")
     {
         QDesktopServices::openUrl(installerExePath), QUrl::TolerantMode;        // start .msi, .msix installer file
     }
