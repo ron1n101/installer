@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>img/V_LOGO_VISION_GREEN_RGB.png</file>
+    </qresource>
+</RCC>
