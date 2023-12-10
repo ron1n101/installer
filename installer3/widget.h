@@ -4,12 +4,13 @@
 
 #include "downloader.h"
 #include <unordered_map>
-#include <set>
+// #include <set>
 
 
 #include <QWidget>
 #include <QCheckBox>
 #include <QList>
+#include <QTextEdit>
 #include <QProcess>
 #include <QDesktopServices>
 // #include <QMap>
@@ -37,18 +38,12 @@ public:
 
 
 private slots:
-    // void onAcrobatReader_checkBox();
-    // void onAnyDesk_checkBox();
-    // void onJava_checkBox();
-    // void onShipSure_checkBox();
-    // void onTeams_checkBox();
-    // void onZip_checkBox();
-    // void onGoogleChrome_checkBox();
+
     void onSelectAll_checkBox();
 
     void onSelectTargetFolder();
     void onInstallPushButton();
-    void onCheckBoxesClicked();
+    // void onCheckBoxesClicked();
     void onCancelDownloadPushButton();
 
 
@@ -61,13 +56,13 @@ private slots:
 private:
     QList<QCheckBox *> checkBoxes;
     // QList<QString> selectedApps;
-    std::set<QString> selectedApps;
+    // std::set<QString> selectedApps;
     QString targetFolder;
     Ui::Widget *ui;
     void downloadApplication(const QString &appName, const QString &downloadUrl);
     QList<Downloader*> downloaders;
     void InstallerRun(const QString &appName);
-
+    QTextEdit *debugText;
     static std::unordered_map<QString, DownloadedApp> fileMapping;
 };
 #endif // WIDGET_H
