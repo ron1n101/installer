@@ -3,24 +3,24 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QDir>
+#include <QEventLoop>
 
-
-Downloader::Downloader(QWidget *parent) : QWidget(parent), manager(new QNetworkAccessManager), reply(nullptr), file(nullptr)
+Downloader::Downloader(QWidget *parent) : QWidget(parent), m_manager(new QNetworkAccessManager), m_reply(nullptr), m_file(nullptr)
 {
-    connect(manager, &QNetworkAccessManager::finished, this, &Downloader::onDownloadFinished);
+    connect(m_manager, &QNetworkAccessManager::finished, this, &Downloader::onDownloadFinished);
 }
 
 
 
 
-void Downloader::start(const QString &targetFolder, const QString &appName ,const QUrl &url)
+void Downloader::start(const QString &m_targetFolder, const QString &m_appName ,const QUrl &url)
 {
-    this->targetFolder = targetFolder;
-    this->appName = appName;
-    downloadUrl = url;
+    this->m_targetFolder = m_targetFolder;
+    this->m_appName = m_appName;
+    m_downloadUrl = url;
 
     QString fileName = QFileInfo(url.path()).fileName();
-    QString filePath = targetFolder + "/" + fileName;
+    QString filePath = m_targetFolder + "/" + fileName;
 
     if (QFile::exists(filePath))
     {
@@ -29,8 +29,8 @@ void Downloader::start(const QString &targetFolder, const QString &appName ,cons
 
     }
 
-    file = new QFile (filePath);
-    if(!file -> open(QIODevice::WriteOnly))
+    m_file = new QFile (filePath);
+    if(!m_file -> open(QIODevice::WriteOnly))
     {
         emit downloadFinished();
         return;
@@ -38,16 +38,36 @@ void Downloader::start(const QString &targetFolder, const QString &appName ,cons
 
 
     QNetworkRequest request(url);
-    reply = manager->get(request);
+    m_reply = m_manager->get(request);
 
-    connect(reply, &QNetworkReply::downloadProgress, this, &Downloader::onDownloadProgress);
+    connect(m_reply, &QNetworkReply::downloadProgress, this, &Downloader::onDownloadProgress);
 }
+
+// bool Downloader::isDownloading() const
+// {
+//     return m_reply && m_reply->isRunning();
+// }
+
+// QString Downloader::getFilePath() const
+// {
+//     return m_file ? m_file->fileName() : QString();
+// }
+
 
 void Downloader::onCancelDownload()
 {
-    if (reply)
+    if (m_reply)
     {
-        reply->abort();
+        m_reply->abort();
+        m_reply->deleteLater(); // Переносим удаление m_reply в асинхронный режим с использованием deleteLater
+
+        if (m_file)
+        {
+            m_file->close();
+            m_file->remove();
+            m_file->deleteLater(); // Переносим удаление m_file в асинхронный режим с использованием deleteLater
+            m_file = nullptr;
+        }
     }
 }
 
@@ -58,25 +78,25 @@ void Downloader::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     int progress = static_cast<int>((bytesReceived * 100) / bytesTotal);
     emit downloadProgress(progress);
 
-    if (file)
+    if (m_file)
     {
-        file->write(reply->readAll());
+        m_file->write(m_reply->readAll());
     }
 }
 
 void Downloader::onDownloadFinished()
 {
-    if (file)
+    if (m_file)
     {
-        file->close();
-        delete file;
-        file = nullptr;
+        m_file->close();
+        delete m_file;
+        m_file = nullptr;
     }
 
-    if (reply)
+    if (m_reply)
     {
-        reply->deleteLater();
-        reply = nullptr;
+        m_reply->deleteLater();
+        m_reply = nullptr;
     }
     emit downloadFinished();
 }
