@@ -5,8 +5,11 @@
 #include <QNetworkAccessManager>
 #include <QCheckBox>
 
+
 class QNetworkReply;
 class QFile;
+
+
 
 class Downloader : public QWidget
 {
@@ -16,8 +19,11 @@ public:
     explicit Downloader(QWidget *parent = nullptr);
 
 
+    // bool isDownloading() const;
+    // QString getFilePath() const;
+
     // метод для запуска скачивания
-    void start (const QString& targetFolder, const QString &appName , const QUrl &url);
+    void start (const QString& targetFolder, const QString &m_appName , const QUrl &url);
 public slots:
     void onCancelDownload();
 
@@ -34,14 +40,14 @@ private slots:
 
 
 private:
-    QNetworkAccessManager *manager;
-    QNetworkReply *reply;
-    QFile *file;
-    QString targetFolder;
-    QString appName;
-    QUrl downloadUrl;
+    QNetworkAccessManager *m_manager;
+    QNetworkReply *m_reply;
+    QFile *m_file;
+    QString m_targetFolder;
+    QString m_appName;
+    QUrl m_downloadUrl;
 
-    bool isCancel;
+    // bool m_isCancel;
 
 };
 
