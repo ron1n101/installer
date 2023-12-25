@@ -19,11 +19,12 @@ public:
     explicit Downloader(QWidget *parent = nullptr);
 
 
-    // bool isDownloading() const;
-    // QString getFilePath() const;
+    bool isDownloading() const;
+    QString getFilePath() const;
 
     // метод для запуска скачивания
     void start (const QString& targetFolder, const QString &m_appName , const QUrl &url);
+    void closeAndRemove();      // ADD NEW METHOD
 public slots:
     void onCancelDownload();
 
@@ -47,7 +48,8 @@ private:
     QString m_appName;
     QUrl m_downloadUrl;
 
-    // bool m_isCancel;
+
+
 
 };
 
