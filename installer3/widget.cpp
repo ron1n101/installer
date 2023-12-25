@@ -40,7 +40,7 @@ Widget::Widget(QWidget *parent)
     w_checkBoxes.append(ui->zip_checkBox);
     w_checkBoxes.append(ui->GoogleChrome_checkBox);
 
-    // ui->TargetFolderLineEdit->setText("D:\\testfolder");
+    ui->TargetFolderLineEdit->setText("D:\\testfolder");
     ui->UpdateProgressBar->setMaximum(100);
 
 }
@@ -88,33 +88,7 @@ void Widget::onSelectTargetFolder()         //выбор директории д
 
 }
 
-void Widget::onCancelDownloadPushButton()   // кнопка остановки закачик
-{
-    for(Downloader *downloader : w_downloaders)
-    {
-        downloader->onCancelDownload();
-    }
-    
-    // for (Downloader *downloader : w_downloaders)
-    // {
-    //     if (downloader->isDownloading())
-    //     {
-    //         QString filePath = ui->TargetFolderLineEdit->text() + "/" + downloader->getFilePath();
-    //         QFile file = filePath;
-    //         if (file.exists())
-    //         {
-    //             file.close();
-    //             file.remove();
-    //             qDebug() << "Removed non-downloaded file: " << filePath;
-    //         }
-    //     }
-    // }
-    qDeleteAll(w_downloaders);
-    w_downloaders.clear();
-    ui->UpdateProgressBar->setValue(0);
-    qDebug() << "Cancel downloading...";
 
-}
 
 
 void Widget::onInstallPushButton()
@@ -128,13 +102,15 @@ void Widget::onInstallPushButton()
         return;
     }
 
+
+
+
     for (auto checkBox : w_checkBoxes)                              // если да, то начинаем скачку.
     {
         QString downloadUrl;
         if (checkBox->isChecked())
         {
             QString appName = checkBox->text();
-
             auto it = w_config.w_apps.find(appName);
             if (it != w_config.w_apps.end())
             {
@@ -143,7 +119,6 @@ void Widget::onInstallPushButton()
             if(!downloadUrl.isEmpty())
             {
                 QString installerPath = ui->TargetFolderLineEdit->text() + "/" + w_config.w_apps[appName].w_pathApp;
-
                 if(QFile::exists(installerPath))
                 {
                     qDebug() << "App " << appName << " is already downloaded. Download skipped.";
@@ -155,12 +130,12 @@ void Widget::onInstallPushButton()
                     qDebug() << "App " << appName << " start downloading.";
                     ui->debugMsg->append("App " + appName + " start downloading.\n");
                 }
-
                 Downloader *m_downloader = new Downloader(this);
                 m_downloader->start(ui->TargetFolderLineEdit->text(), appName, QUrl(downloadUrl));
                 connect(m_downloader, &Downloader::downloadProgress, this, &Widget::updateProgressBar);
                 connect(m_downloader, &Downloader::downloadFinished, m_downloader, &Downloader::deleteLater);
-                connect(m_downloader, &Downloader::downloadFinished, this, [this, appName]() {
+                connect(m_downloader, &Downloader::downloadFinished, this, [this, appName]()
+                {
                     InstallerRun(appName);
                 });
                 w_downloaders.append(m_downloader);
@@ -170,42 +145,68 @@ void Widget::onInstallPushButton()
 }
 
 
+
 void Widget::InstallerRun(const QString &appName)       // метод для запуска установки
 {
-    QProcess *installerProcess = new QProcess(this);
-    QString installerExePath = QUrl::fromLocalFile(ui->TargetFolderLineEdit->text() + "\\" + w_config.w_apps[appName].w_pathApp).toLocalFile();       // changed to open method
-
-    qDebug() << "Running installer for " << appName << " from " << installerExePath;
-    ui->debugMsg->append("Running installer for " + appName + " from " + installerExePath);
-
-    QFileInfo fileInfo(installerExePath);
-    QString fileExtension = fileInfo.suffix().toLower();
-
-    if(fileExtension == "msi" || fileExtension == "msix" || fileExtension == "exe")
+    while(!m_isCancel)
     {
-        QThread::msleep(100);
-        QDesktopServices::openUrl(installerExePath), QUrl::TolerantMode;        // start .msi, .msix installer file
+        QProcess *installerProcess = new QProcess(this);
+        QString installerExePath = QUrl::fromLocalFile(ui->TargetFolderLineEdit->text() + "\\" + w_config.w_apps[appName].w_pathApp).toLocalFile();       // changed to open method
+
+        qDebug() << "Running installer for " << appName << " from " << installerExePath;
+        ui->debugMsg->append("Running installer for " + appName + " from " + installerExePath);
+
+        QFileInfo fileInfo(installerExePath);
+        QString fileExtension = fileInfo.suffix().toLower();
+
+        if(fileExtension == "msi" || fileExtension == "msix" || fileExtension == "exe")
+        {
+            QThread::msleep(100);
+            QDesktopServices::openUrl(installerExePath), QUrl::TolerantMode;        // start .msi, .msix installer file
+        }
+
+        if (!QFile::exists(installerExePath))
+        {
+            qDebug() << "Error: Installer file not found!\n";
+            ui->debugMsg->append("Error: Installer file not found!\n");
+        }
+        else
+        {
+            qDebug() << "Installer file found!\n";
+            ui->debugMsg->append("Installer file found!\n");
+
+            installerProcess->start(installerExePath);
+
+            return;
+        }
+        connect(installerProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [installerProcess]()
+        {
+            qDebug() << "Installer finished with exit code: " << installerProcess->exitCode() << "\n";
+
+
+            installerProcess->deleteLater();
+        });
     }
 
-    if (!QFile::exists(installerExePath))
+}
+
+
+
+
+void Widget::onCancelDownloadPushButton()   // кнопка остановки закачик
+{
+    if(m_isCancel)
     {
-        qDebug() << "Error: Installer file not found!\n";
-        ui->debugMsg->append("Error: Installer file not found!\n");
+        for (Downloader *downloader : w_downloaders)
+        {
+            if (downloader->isDownloading())
+            {
+                downloader->closeAndRemove();
+            }
+        }
+        qDeleteAll(w_downloaders);
+        w_downloaders.clear();
+        ui->UpdateProgressBar->setValue(0);
+        qDebug() << "Cancel downloading...";
     }
-    else
-    {
-        qDebug() << "Installer file found!\n";
-        ui->debugMsg->append("Installer file found!\n");
-
-        installerProcess->start(installerExePath);
-
-        return;
-    }
-    connect(installerProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [installerProcess]()
-    {
-        qDebug() << "Installer finished with exit code: " << installerProcess->exitCode() << "\n";
-
-
-        installerProcess->deleteLater();
-    });
 }
