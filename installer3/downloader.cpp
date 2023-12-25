@@ -33,6 +33,8 @@ void Downloader::start(const QString &m_targetFolder, const QString &m_appName ,
     if(!m_file -> open(QIODevice::WriteOnly))
     {
         emit downloadFinished();
+        delete m_file;          //
+        m_file = nullptr;       //
         return;
     }
 
@@ -43,15 +45,26 @@ void Downloader::start(const QString &m_targetFolder, const QString &m_appName ,
     connect(m_reply, &QNetworkReply::downloadProgress, this, &Downloader::onDownloadProgress);
 }
 
-// bool Downloader::isDownloading() const
-// {
-//     return m_reply && m_reply->isRunning();
-// }
 
-// QString Downloader::getFilePath() const
-// {
-//     return m_file ? m_file->fileName() : QString();
-// }
+void Downloader::closeAndRemove()
+{
+    if(m_file)
+    {
+        m_file->close();
+        m_file->remove();
+    }
+}
+
+
+bool Downloader::isDownloading() const
+{
+    return m_reply && m_reply->isRunning();
+}
+
+QString Downloader::getFilePath() const
+{
+    return m_file ? m_file->fileName() : QString();
+}
 
 
 void Downloader::onCancelDownload()
@@ -63,7 +76,10 @@ void Downloader::onCancelDownload()
 
         if (m_file)
         {
-            m_file->close();
+            if(m_file->isOpen())
+            {
+                m_file->close();
+            }
             m_file->remove();
             m_file->deleteLater(); // Переносим удаление m_file в асинхронный режим с использованием deleteLater
             m_file = nullptr;
@@ -78,7 +94,7 @@ void Downloader::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     int progress = static_cast<int>((bytesReceived * 100) / bytesTotal);
     emit downloadProgress(progress);
 
-    if (m_file)
+    if (m_file && m_file->isOpen())
     {
         m_file->write(m_reply->readAll());
     }
@@ -88,9 +104,19 @@ void Downloader::onDownloadFinished()
 {
     if (m_file)
     {
-        m_file->close();
-        delete m_file;
-        m_file = nullptr;
+        if (m_file->isOpen())
+        {
+            m_file->close();
+        }
+        if (QFile::exists(m_file->fileName()))
+        {
+            delete m_file;
+            m_file = nullptr;
+        }
+        else
+        {
+            qDebug() << "Error: File not found: " << m_file->fileName();
+        }
     }
 
     if (m_reply)
