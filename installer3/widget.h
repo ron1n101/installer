@@ -31,7 +31,6 @@ struct DownloadedApp
 struct Config
 {
     QString w_download_path;
-    // bool w_remove_after_install;
     std::unordered_map<QString, DownloadedApp> w_apps =
     {
         {"Acrobat Reader", {"https://admdownload.adobe.com/rdcm/installers/live/readerdc64.exe", "readerdc64.exe"}},
@@ -78,5 +77,6 @@ private:
     void loadConfig();
     void downloadApplication(const QString &appName, const QString &downloadUrl);
     void InstallerRun(const QString &appName);
+    bool m_isCancel;
 };
 #endif // WIDGET_H
