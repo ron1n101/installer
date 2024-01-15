@@ -40,7 +40,7 @@ Widget::Widget(QWidget *parent)
     w_checkBoxes.append(ui->zip_checkBox);
     w_checkBoxes.append(ui->GoogleChrome_checkBox);
 
-    ui->TargetFolderLineEdit->setText("D:\\testfolder");
+    // ui->TargetFolderLineEdit->setText("D:\\testfolder");
     ui->UpdateProgressBar->setMaximum(100);
 
 }
@@ -54,7 +54,7 @@ Widget::~Widget()
 void Widget::loadConfig()
 {
     w_config.w_download_path = w_targetFolder;
-    // w_config.w_remove_after_install = false;
+
     w_config.w_apps;
 }
 
@@ -161,7 +161,7 @@ void Widget::InstallerRun(const QString &appName)       // метод для з�
 
         if(fileExtension == "msi" || fileExtension == "msix" || fileExtension == "exe")
         {
-            QThread::msleep(100);
+            QThread::msleep(500);
             QDesktopServices::openUrl(installerExePath), QUrl::TolerantMode;        // start .msi, .msix installer file
         }
 
@@ -193,20 +193,46 @@ void Widget::InstallerRun(const QString &appName)       // метод для з�
 
 
 
-void Widget::onCancelDownloadPushButton()   // кнопка остановки закачик
+// void Widget::onCancelDownloadPushButton()   // кнопка остановки закачик
+// {
+//     if(m_isCancel)
+//     {
+//         for (Downloader *downloader : w_downloaders)
+//         {
+//             if (downloader->isDownloading())
+//             {
+//                 downloader->closeAndRemove();
+//             }
+//         }
+//         qDeleteAll(w_downloaders);
+//         w_downloaders.clear();
+//         ui->UpdateProgressBar->setValue(0);
+//         qDebug() << "Cancel downloading...";
+//     }
+// }
+
+void Widget::onCancelDownloadPushButton()
 {
-    if(m_isCancel)
+    if (!m_isCancel)
     {
+        m_isCancel = true;  // Set the flag to stop further downloads
         for (Downloader *downloader : w_downloaders)
         {
             if (downloader->isDownloading())
             {
                 downloader->closeAndRemove();
             }
+
+            // Disconnect signals using QObject::disconnect
+            disconnect(downloader, &Downloader::downloadProgress, this, &Widget::updateProgressBar);
+            disconnect(downloader, &Downloader::downloadFinished, downloader, &Downloader::deleteLater);
+            disconnect(downloader, &Downloader::downloadFinished, this, nullptr);
         }
-        qDeleteAll(w_downloaders);
+
+        // Clear the list without deleting the downloader objects
         w_downloaders.clear();
         ui->UpdateProgressBar->setValue(0);
         qDebug() << "Cancel downloading...";
     }
 }
+
