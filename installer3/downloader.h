@@ -21,10 +21,14 @@ public:
 
     bool isDownloading() const;
     QString getFilePath() const;
+    QString getAppName() const;     // new
 
     // метод для запуска скачивания
     void start (const QString& targetFolder, const QString &m_appName , const QUrl &url);
+
     void closeAndRemove();      // ADD NEW METHOD
+    // void abortDownload();       // NEW
+
 public slots:
     void onCancelDownload();
 
@@ -47,7 +51,7 @@ private:
     QString m_targetFolder;
     QString m_appName;
     QUrl m_downloadUrl;
-
+    // bool m_isCancel;
 
 
 
