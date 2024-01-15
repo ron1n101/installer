@@ -12,7 +12,7 @@ Downloader::Downloader(QWidget *parent) : QWidget(parent), m_manager(new QNetwor
 
 
 
-
+// start downloading
 void Downloader::start(const QString &m_targetFolder, const QString &m_appName ,const QUrl &url)
 {
     this->m_targetFolder = m_targetFolder;
@@ -46,14 +46,7 @@ void Downloader::start(const QString &m_targetFolder, const QString &m_appName ,
 }
 
 
-void Downloader::closeAndRemove()
-{
-    if(m_file)
-    {
-        m_file->close();
-        m_file->remove();
-    }
-}
+
 
 
 bool Downloader::isDownloading() const
@@ -67,6 +60,8 @@ QString Downloader::getFilePath() const
 }
 
 
+
+// Cancel Download method
 void Downloader::onCancelDownload()
 {
     if (m_reply)
@@ -87,8 +82,18 @@ void Downloader::onCancelDownload()
     }
 }
 
+// Close and Remove method
+void Downloader::closeAndRemove()
+{
+    if(m_file)
+    {
+        m_file->close();
+        m_file->remove();
+    }
+}
 
 
+// Download progress-bar
 void Downloader::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     int progress = static_cast<int>((bytesReceived * 100) / bytesTotal);
@@ -100,6 +105,8 @@ void Downloader::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     }
 }
 
+
+// Finished download method
 void Downloader::onDownloadFinished()
 {
     if (m_file)
